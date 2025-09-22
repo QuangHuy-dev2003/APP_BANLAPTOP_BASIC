@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/appBackground"
+    tools:context=".ui.fragments.ProductDetailFragment">
+
+    <!-- Nút quay lại nhỏ gọn ở góc trên trái -->
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="16dp"
+        android:layout_gravity="start|top"
+        android:background="@drawable/bg_round_surface"
+        android:padding="6dp"
+        android:src="@drawable/ic_arrow_back"
+        android:contentDescription="Quay lại"
+        android:elevation="4dp" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:padding="16dp"
+        android:clipToPadding="false"
+        android:paddingTop="64dp"
+        android:paddingBottom="80dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Layout 2 trên: Ảnh bên trái + Thông tin bên phải -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="20dp">
+
+                <!-- Ảnh sản phẩm bên trái -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="200dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="16dp">
+
+                    <ImageView
+                        android:id="@+id/imgProduct"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="fitCenter"
+                        android:background="@drawable/bg_card"
+                        android:padding="8dp"
+                        android:contentDescription="Hình sản phẩm"
+                        tools:src="@drawable/ic_products" />
+                </FrameLayout>
+
+                <!-- Thông tin sản phẩm bên phải -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="18sp"
+                        android:maxLines="3"
+                        android:ellipsize="end"
+                        android:lineSpacingExtra="2dp"
+                        tools:text="Laptop Gaming ABC" />
+
+                    <TextView
+                        android:id="@+id/tvPrice"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:textColor="@color/colorPrimary"
+                        android:textStyle="bold"
+                        android:textSize="20sp"
+                        tools:text="25.990.000 đ" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Layout 1 dưới: Mô tả sản phẩm -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Mô tả sản phẩm"
+                    android:textStyle="bold"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/tvDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="4dp"
+                    tools:text="Mô tả sản phẩm chi tiết..." />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Button thêm vào giỏ hàng ở dưới, không che mô tả -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAddToCart"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Thêm vào giỏ hàng"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:layout_margin="16dp"
+        app:cornerRadius="14dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:textColor="@color/white"
+        android:layout_gravity="bottom"
+        app:icon="@drawable/ic_cart"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        app:iconTint="@color/white"
+        android:backgroundTint="@color/colorPrimary" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+

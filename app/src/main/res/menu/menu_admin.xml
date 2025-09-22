@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_dashboard"
+        android:title="Bảng điều khiển"
+        android:icon="@drawable/ic_dashboard" />
+
+    <item
+        android:id="@+id/menu_products"
+        android:title="Quản lý Sản phẩm"
+        android:icon="@drawable/ic_products" />
+
+    <item
+        android:id="@+id/menu_orders"
+        android:title="Quản lý Đơn hàng"
+        android:icon="@drawable/ic_orders" />
+
+    <item
+        android:id="@+id/menu_reports"
+        android:title="Báo cáo thống kê"
+        android:icon="@drawable/ic_reports" />
+
+    <item
+        android:id="@+id/menu_logout"
+        android:title="Đăng xuất"
+        android:icon="@drawable/ic_logout"
+        android:menuCategory="secondary" />
+</menu>
+

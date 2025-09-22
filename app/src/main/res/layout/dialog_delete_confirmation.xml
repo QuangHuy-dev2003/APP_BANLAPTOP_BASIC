@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_dialog_delete_confirmation_with_shadow"
+    android:animateLayoutChanges="true">
+
+    <!-- Icon cảnh báo -->
+    <ImageView
+        android:id="@+id/iv_warning_icon"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_warning"
+        android:background="@drawable/bg_warning_icon_circle"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Tiêu đề -->
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Xác nhận xóa"
+        android:textColor="@color/textPrimary"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Nội dung -->
+    <TextView
+        android:id="@+id/tv_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?"
+        android:textColor="@color/textSecondary"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Nút hành động -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <!-- Nút hủy -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_cancel"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hủy"
+            android:textColor="@color/textSecondary"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:layout_marginEnd="12dp"
+            android:minWidth="80dp"
+            app:cornerRadius="8dp" />
+
+        <!-- Nút xóa -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_delete"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Xóa"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="@color/error"
+            android:minWidth="80dp"
+            app:cornerRadius="8dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

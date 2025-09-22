@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Selected state - màu primary đậm -->
+    <item android:color="@color/colorPrimary" android:state_checked="true" />
+    <!-- Pressed state - màu primary nhạt -->
+    <item android:color="@color/colorPrimary" android:state_pressed="true" />
+    <!-- Unselected state - màu xám -->
+    <item android:color="@color/textSecondary" />
+</selector>

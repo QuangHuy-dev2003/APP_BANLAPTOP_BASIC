@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/appBackground"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Phần trên: Cảm ơn và thông tin đơn hàng -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_thank_you"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardUseCompatPadding="true"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@color/surface"
+            app:cardCornerRadius="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp"
+                android:gravity="center">
+
+                <!-- Icon thành công -->
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_marginBottom="16dp"
+                    android:src="@drawable/ic_check_white"
+                    android:background="@drawable/bg_success_circle"
+                    android:padding="16dp"
+                    android:contentDescription="success" />
+
+                <!-- Lời cảm ơn -->
+                <TextView
+                    android:id="@+id/tv_thank_you"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cảm ơn bạn đã đặt hàng!"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Mã đơn hàng -->
+                <TextView
+                    android:id="@+id/tv_order_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Mã đơn hàng: #123456"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_marginBottom="24dp" />
+
+                <!-- Hai nút hành động -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginTop="8dp">
+
+                    <!-- Nút theo dõi đơn hàng -->
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btn_track_order"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        android:text="Theo dõi đơn hàng"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:background="@drawable/ripple_button_track_order"
+                        android:drawableStart="@drawable/ic_track_order"
+                        android:drawablePadding="8dp"
+                        android:gravity="center"
+                        android:elevation="4dp"
+                        android:stateListAnimator="@null" />
+
+                    <!-- Nút về trang chủ -->
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btn_go_home"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:text="Về trang chủ"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:background="@drawable/ripple_button_go_home"
+                        android:drawableStart="@drawable/ic_home"
+                        android:drawablePadding="8dp"
+                        android:gravity="center"
+                        android:elevation="4dp"
+                        android:stateListAnimator="@null" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Phần dưới: Sản phẩm gợi ý -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_recommended"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardUseCompatPadding="true"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/surface"
+            app:cardCornerRadius="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Tiêu đề sản phẩm gợi ý -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sản phẩm bạn có thể quan tâm"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- RecyclerView hiển thị sản phẩm 2x2 -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_recommended_products"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:clipToPadding="false"
+                    android:padding="4dp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+</ScrollView>

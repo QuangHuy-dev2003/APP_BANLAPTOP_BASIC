@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_success">Đăng nhập thành công</string>
+    <string name="title_require_login">Yêu cầu đăng nhập</string>
+    <string name="msg_require_login">Bạn cần đăng nhập để sử dụng tính năng này.</string>
+    <string name="btn_agree">Đồng ý</string>
+    <string name="app_name">QuanLyCuaHangLapTop</string>
+
+    <!-- Auth common -->
+    <string name="auth_email">Email</string>
+    <string name="auth_username">Tên người dùng</string>
+    <string name="auth_password">Mật khẩu</string>
+    <string name="auth_phone">Số điện thoại</string>
+    <string name="auth_show_password">Hiện/Ẩn mật khẩu</string>
+
+    <!-- Login -->
+    <string name="login_title">Đăng nhập</string>
+    <string name="login_button">Đăng nhập</string>
+    <string name="login_no_account">Bạn chưa có tài khoản?</string>
+    <string name="login_go_register">Đăng ký</string>
+
+    <!-- Register -->
+    <string name="register_title">Đăng ký</string>
+    <string name="register_button">Tạo tài khoản</string>
+    <string name="register_have_account">Bạn đã có tài khoản?</string>
+    <string name="register_go_login">Đăng nhập</string>
+    <string name="register_success">Tạo tài khoản thành công</string>
+
+    <!-- Admin -->
+    <string name="title_admin_dashboard">Quản trị</string>
+    <string name="open">Mở</string>
+    <string name="close">Đóng</string>
+    <string name="admin_dashboard">Bảng điều khiển</string>
+    <string name="admin_products">Quản lý Sản phẩm</string>
+    <string name="admin_logout">Đăng xuất</string>
+
+    <!-- Products/messages -->
+    <string name="update_feature_coming">Tính năng cập nhật sẽ sớm có!</string>
+    <string name="create_feature_coming">Tính năng thêm mới sẽ sớm có!</string>
+    <string name="delete_success">Xoá sản phẩm thành công</string>
+    <string name="delete_fail">Xoá sản phẩm thất bại</string>
+
+    <!-- Product detail -->
+    <string name="added_to_cart_success">Đã thêm vào giỏ hàng</string>
+
+    <!-- Orders/admin -->
+    <string name="update_success">Cập nhật thành công</string>
+    <string name="update_fail">Cập nhật thất bại</string>
+
+    <string name="label_year">Năm</string>
+    <string name="prompt_select_year">Chọn năm</string>
+</resources>
+
