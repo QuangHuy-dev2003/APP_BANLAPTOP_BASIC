@@ -342,21 +342,21 @@ public class CheckoutActivity extends AppCompatActivity implements CheckoutAdapt
             order.setPhone(userPhone);
             order.setStatus(com.example.quanlycuahanglaptop.domain.OrderStatus.RECEIVED); // Mặc định là "Đã Tiếp Nhận"
             
-            orderId = orderService.createOrder(order);
-            
-            // Tạo OrderItems
+            // Chuẩn bị OrderItems
             List<OrderItem> orderItems = new ArrayList<>();
             for (CartItemRepository.CartItemWithProduct cartItem : cartItems) {
                 OrderItem orderItem = new OrderItem();
-                orderItem.setOrderId(orderId);
                 orderItem.setProductId(cartItem.getProduct().getId());
                 orderItem.setQuantity(cartItem.getCartItem().getQuantity());
                 orderItem.setPrice(cartItem.getProduct().getPrice());
                 orderItems.add(orderItem);
             }
             
-            // Lưu OrderItems
-            orderService.createOrderItems(orderItems);
+            // Tạo Order + Items + Trừ kho trong 1 transaction
+            orderId = orderService.createOrderWithItemsAndReduceStock(order, orderItems);
+            if (orderId <= 0) {
+                throw new IllegalStateException("Đặt hàng thất bại: Sản phẩm có thể không đủ số lượng");
+            }
             
             // Xóa giỏ hàng
             cartService.clearCart(currentUserId);

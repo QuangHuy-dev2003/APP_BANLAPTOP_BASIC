@@ -34,6 +34,32 @@
 - Quản trị: `AdminActivity` với menu:
   - `ProductsFragment` (CRUD sản phẩm), `OrdersFragment` (danh sách/chi tiết/đổi trạng thái), `ReportsFragment` (biểu đồ), `DashboardFragment`.
 
+### 3.1 Sơ đồ luồng tổng quan (text)
+
+```
+SplashActivity
+   ├─ isLoggedIn? ──► no ─► LoginActivity ─► RegisterActivity (optional)
+   │                                 └─► MainActivity (USER)
+   └─ yes ─► role == ADMIN ? ──► AdminActivity (ADMIN)
+                                └─► MainActivity (USER)
+
+MainActivity (USER)
+   ├─ HomeFragment / AllProductsFragment ─► ProductDetailFragment ─► Add to Cart
+   ├─ CartFragment ─► CheckoutActivity
+   │      └─ Đặt hàng: OrderService.createOrderWithItemsAndReduceStock
+   │            - Tạo Order + OrderItems trong 1 transaction
+   │            - Trừ kho Product.quantity theo từng OrderItem
+   └─ OrderHistoryActivity ─► OrderDetailActivity
+           └─ Huỷ đơn (điều kiện): OrderService.cancelOrderAndRestoreStock
+               - Cập nhật trạng thái CANCELLED
+               - Cộng trả tồn kho Product.quantity
+
+AdminActivity (ADMIN)
+   ├─ ProductsFragment (thêm/sửa/xoá, xem danh sách)
+   ├─ OrdersFragment (tìm kiếm/lọc/đổi trạng thái)
+   └─ ReportsFragment (doanh thu, top sản phẩm)
+```
+
 ## 4) Cấu trúc thư mục chính
 - `app/src/main/java/com/example/quanlycuahanglaptop/`
   - `app/`: `MainActivity`, `LoginActivity`, `RegisterActivity`, `AdminActivity`.
@@ -62,13 +88,55 @@
   - `SessionRepository`: lưu session đăng nhập.
   - `OrderService` trực tiếp dùng `AppDatabase` cho các truy vấn đơn hàng: tạo đơn, cập nhật trạng thái, lấy item theo `order_id`, thống kê doanh thu, top 3 sản phẩm theo năm, tổng hợp theo trạng thái.
 
+### 5.1 Mô hình dữ liệu & quan hệ bảng
+
+Các bảng chính (SQLite):
+- `User(id, name, email UNIQUE, password, phone, role CHECK('ADMIN','USER',...))`
+- `Product(id, name, description, price, quantity, image)`
+- `"Order"(id, user_id -> User.id, total_price, address, phone, status CHECK('RECEIVED','SHIPPING','DELIVERED','CANCELLED'), created_at)`
+- `OrderItem(id, order_id -> Order.id, product_id -> Product.id, quantity, price)`
+- `CartItem(id, user_id -> User.id, product_id -> Product.id, quantity, added_at)`
+- `Session(id, user_id -> User.id, token, created_at, expires_at)`
+
+Quan hệ:
+- 1 `User` ──< nhiều `Order`
+- 1 `Order` ──< nhiều `OrderItem`
+- 1 `Product` ──< nhiều `OrderItem` và ──< nhiều `CartItem`
+
+Index quan trọng:
+- `idx_user_email` trên `User(email)`
+- `idx_order_user_id` trên `Order(user_id)`
+- `idx_cartitem_user_id` trên `CartItem(user_id)`
+- `idx_session_user_id` trên `Session(user_id)`
+
+Lưu ý mapping cột `Order` theo đúng thứ tự schema:
+`id(0), user_id(1), total_price(2), address(3), phone(4), status(5), created_at(6)`
+
+### 5.2 Chính sách tồn kho
+- Khi đặt hàng: trừ tồn kho theo từng `OrderItem` trong 1 transaction (`createOrderWithItemsAndReduceStock`).
+- Khi huỷ đơn (trạng thái `RECEIVED`): cộng trả tồn kho theo `OrderItem` trong 1 transaction (`cancelOrderAndRestoreStock`).
+- Nếu không đủ hàng khi đặt: rollback và báo lỗi.
+
 ## 6) Service chính (Business logic)
 - `AuthService`: đăng ký/đăng nhập, lưu session (`SessionManager`), đăng xuất.
 - `UserService`: validate input, băm mật khẩu (SHA-256), CRUD người dùng.
-- `ProductService`: validate và gọi `ProductRepository` (phân trang/sort/search).
+- `ProductService`: validate và gọi `ProductRepository` (phân trang/sort/search, tăng/giảm tồn kho theo batch).
 - `CartService`: thêm/xoá/cập nhật số lượng giỏ; tính tổng tiền.
 - `OrderService`:
   - Tạo đơn (lưu `created_at` theo VN timezone), cập nhật trạng thái (`OrderStatus`), lấy đơn theo user/trạng thái, lấy chi tiết item; thống kê: doanh thu năm, top 3 sản phẩm/năm, đếm đơn theo trạng thái.
+  - Đặt hàng an toàn: `createOrderWithItemsAndReduceStock(order, items)` (transaction).
+  - Huỷ đơn an toàn (chỉ khi `RECEIVED`): `cancelOrderAndRestoreStock(orderId)` (transaction).
+
+### 6.1 API nội bộ hay dùng (mô tả nhanh)
+- `OrderService.createOrderWithItemsAndReduceStock(order, items): long`
+  - Trả về `orderId > 0` nếu thành công; `-1` nếu thiếu hàng/lỗi.
+- `OrderService.cancelOrderAndRestoreStock(orderId): boolean`
+  - `true` nếu huỷ + hoàn kho thành công; `false` nếu không thoả điều kiện hoặc lỗi.
+- `ProductService.decreaseStockBatch(items): boolean` / `increaseStockBatch(items): boolean`
+
+### 6.2 Định dạng thời gian `created_at`
+- Lưu ở DB dạng `yyyy-MM-dd HH:mm:ss` (giờ VN).
+- Hiển thị dùng `TimeUtils.formatDatabaseTimeToVietnam(created_at)`.
 
 ## 7) Điều hướng & UI
 - `AndroidManifest.xml`: khai báo launcher `SplashActivity` và các Activity khác (`MainActivity`, `AdminActivity`, `CheckoutActivity`, ...).
@@ -84,6 +152,15 @@
 - Đăng nhập:
   - Nếu CSDL trống, đăng ký tài khoản USER từ `RegisterActivity`.
   - Tài khoản ADMIN phụ thuộc dữ liệu khởi tạo (tuỳ bản build). Có thể tạo user rồi gán `Role.ADMIN` qua code/debug DB.
+
+### 8.1 Hướng dẫn sử dụng nhanh
+- USER:
+  - Vào tab Sản phẩm → chọn sản phẩm → Thêm giỏ → Vào Giỏ → Đặt hàng.
+  - Xem Lịch sử đơn → chạm một đơn để xem chi tiết → có thể huỷ trong 30 phút nếu trạng thái `RECEIVED`.
+- ADMIN:
+  - Vào Quản lý Sản phẩm: thêm/sửa/xoá.
+  - Vào Đơn hàng: lọc theo trạng thái, xem chi tiết, đổi trạng thái.
+  - Vào Báo cáo: xem biểu đồ doanh thu, top sản phẩm.
 
 ## 9) Tài nguyên bên thứ ba
 - MPAndroidChart (biểu đồ `PieChart`, `BarChart`) dùng trong `ReportsFragment`.

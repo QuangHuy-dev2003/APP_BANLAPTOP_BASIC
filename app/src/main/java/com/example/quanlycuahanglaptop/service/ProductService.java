@@ -79,6 +79,44 @@ public class ProductService {
         return productRepository.countByName(keyword.trim());
     }
 
+    /** Giảm tồn kho cho một sản phẩm, trả về true nếu trừ thành công (đủ hàng). */
+    public boolean decreaseQuantity(long productId, int quantity) {
+        if (productId <= 0) throw new IllegalArgumentException("productId invalid");
+        if (quantity <= 0) return true;
+        return productRepository.decreaseQuantity(productId, quantity);
+    }
+
+    /**
+     * Giảm tồn kho theo danh sách item. Trả về false nếu bất kỳ sản phẩm nào không đủ hàng.
+     * Lưu ý: Không tự quản lý transaction tại đây; hãy gọi từ service cấp trên đã bắt đầu transaction.
+     */
+    public boolean decreaseStockBatch(java.util.List<com.example.quanlycuahanglaptop.domain.OrderItem> items) {
+        if (items == null || items.isEmpty()) return true;
+        for (com.example.quanlycuahanglaptop.domain.OrderItem it : items) {
+            if (!decreaseQuantity(it.getProductId(), it.getQuantity())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Tăng kho cho 1 sản phẩm. */
+    public boolean increaseQuantity(long productId, int quantity) {
+        if (productId <= 0) throw new IllegalArgumentException("productId invalid");
+        if (quantity <= 0) return true;
+        return productRepository.increaseQuantity(productId, quantity);
+    }
+
+    /** Cộng tồn kho theo danh sách item (dùng khi huỷ đơn). */
+    public boolean increaseStockBatch(java.util.List<com.example.quanlycuahanglaptop.domain.OrderItem> items) {
+        if (items == null || items.isEmpty()) return true;
+        boolean ok = true;
+        for (com.example.quanlycuahanglaptop.domain.OrderItem it : items) {
+            ok &= increaseQuantity(it.getProductId(), it.getQuantity());
+        }
+        return ok;
+    }
+
     private void validate(Product product) {
         if (product.getName() == null || product.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Tên sản phẩm không được để trống");

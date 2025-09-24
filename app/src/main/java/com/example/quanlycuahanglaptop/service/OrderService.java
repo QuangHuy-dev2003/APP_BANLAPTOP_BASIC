@@ -22,9 +22,11 @@ import java.util.Locale;
  */
 public class OrderService {
     private final AppDatabase appDatabase;
+    private ProductService productService;
 
     public OrderService(Context context) {
         this.appDatabase = AppDatabase.getInstance(context);
+        this.productService = new ProductService(context);
     }
 
     /**
@@ -77,6 +79,39 @@ public class OrderService {
     }
 
     /**
+     * Quy trình đặt hàng có trừ kho:
+     * - Bắt đầu transaction
+     * - Tạo Order
+     * - Tạo OrderItems
+     * - Giảm tồn kho theo số lượng từng sản phẩm (kiểm tra đủ hàng)
+     * - Commit; nếu lỗi/không đủ hàng -> rollback và trả về -1
+     */
+    public long createOrderWithItemsAndReduceStock(Order order, List<OrderItem> orderItems) {
+        SQLiteDatabase db = appDatabase.getConnection();
+        db.beginTransaction();
+        try {
+            long newOrderId = createOrder(order);
+            for (OrderItem item : orderItems) {
+                item.setOrderId(newOrderId);
+            }
+            createOrderItems(orderItems);
+
+            // Trừ kho theo batch
+            boolean ok = productService.decreaseStockBatch(orderItems);
+            if (!ok) {
+                throw new IllegalStateException("Sản phẩm không đủ số lượng trong kho");
+            }
+
+            db.setTransactionSuccessful();
+            return newOrderId;
+        } catch (Exception ex) {
+            return -1L;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    /**
      * Lấy danh sách đơn hàng của user
      */
     public List<Order> getOrdersByUserId(long userId) {
@@ -92,10 +127,10 @@ public class OrderService {
                 order.setId(cursor.getLong(0));
                 order.setUserId(cursor.getLong(1));
                 order.setTotalPrice(cursor.getDouble(2));
-                order.setCreatedAt(cursor.getString(3)); // created_at ở index 3
-                order.setAddress(cursor.getString(4));   // address ở index 4
-                order.setPhone(cursor.getString(5));     // phone ở index 5
-                order.setStatus(OrderStatus.fromString(cursor.getString(6))); // status ở index 6
+                order.setAddress(cursor.getString(3));   // address ở index 3
+                order.setPhone(cursor.getString(4));     // phone ở index 4
+                order.setStatus(OrderStatus.fromString(cursor.getString(5))); // status ở index 5
+                order.setCreatedAt(cursor.getString(6)); // created_at ở index 6
                 orders.add(order);
             }
         } finally {
@@ -119,10 +154,10 @@ public class OrderService {
                 order.setId(cursor.getLong(0));
                 order.setUserId(cursor.getLong(1));
                 order.setTotalPrice(cursor.getDouble(2));
-                order.setCreatedAt(cursor.getString(3));
-                order.setAddress(cursor.getString(4));
-                order.setPhone(cursor.getString(5));
-                order.setStatus(OrderStatus.fromString(cursor.getString(6)));
+                order.setAddress(cursor.getString(3));
+                order.setPhone(cursor.getString(4));
+                order.setStatus(OrderStatus.fromString(cursor.getString(5)));
+                order.setCreatedAt(cursor.getString(6));
                 orders.add(order);
             }
         } finally {
@@ -174,10 +209,10 @@ public class OrderService {
                 order.setId(cursor.getLong(0));
                 order.setUserId(cursor.getLong(1));
                 order.setTotalPrice(cursor.getDouble(2));
-                order.setCreatedAt(cursor.getString(3)); // created_at ở index 3
-                order.setAddress(cursor.getString(4));   // address ở index 4
-                order.setPhone(cursor.getString(5));     // phone ở index 5
-                order.setStatus(OrderStatus.fromString(cursor.getString(6))); // status ở index 6
+                order.setAddress(cursor.getString(3));   // address ở index 3
+                order.setPhone(cursor.getString(4));     // phone ở index 4
+                order.setStatus(OrderStatus.fromString(cursor.getString(5))); // status ở index 5
+                order.setCreatedAt(cursor.getString(6)); // created_at ở index 6
                 orders.add(order);
             }
         } finally {
@@ -197,6 +232,38 @@ public class OrderService {
         
         int rowsAffected = db.update("\"Order\"", values, "id = ?", new String[]{String.valueOf(orderId)});
         return rowsAffected > 0;
+    }
+
+    /**
+     * Huỷ đơn hàng và cộng lại tồn kho:
+     * - Chỉ cho phép nếu trạng thái hiện tại là RECEIVED (chưa giao/đóng gói), tuỳ theo luật nghiệp vụ.
+     * - Transaction: cập nhật trạng thái -> cộng tồn kho theo OrderItem -> commit.
+     */
+    public boolean cancelOrderAndRestoreStock(long orderId) {
+        SQLiteDatabase db = appDatabase.getConnection();
+        db.beginTransaction();
+        try {
+            // Lấy đơn hàng
+            Order order = getOrderById(orderId);
+            if (order == null) return false;
+            if (order.getStatus() != OrderStatus.RECEIVED) return false;
+
+            // Cập nhật trạng thái CANCELLED
+            ContentValues values = new ContentValues();
+            values.put("status", OrderStatus.CANCELLED.toString());
+            int rows = db.update("\"Order\"", values, "id = ?", new String[]{String.valueOf(orderId)});
+            if (rows <= 0) return false;
+
+            // Lấy danh sách item và cộng kho
+            List<OrderItem> items = getOrderItemsByOrderId(orderId);
+            boolean ok = productService.increaseStockBatch(items);
+            if (!ok) return false;
+
+            db.setTransactionSuccessful();
+            return true;
+        } finally {
+            db.endTransaction();
+        }
     }
 
     /**
@@ -232,10 +299,10 @@ public class OrderService {
                 order.setId(cursor.getLong(0));
                 order.setUserId(cursor.getLong(1));
                 order.setTotalPrice(cursor.getDouble(2));
-                order.setCreatedAt(cursor.getString(3)); // created_at ở index 3
-                order.setAddress(cursor.getString(4));   // address ở index 4
-                order.setPhone(cursor.getString(5));     // phone ở index 5
-                order.setStatus(OrderStatus.fromString(cursor.getString(6))); // status ở index 6
+                order.setAddress(cursor.getString(3));   // address ở index 3
+                order.setPhone(cursor.getString(4));     // phone ở index 4
+                order.setStatus(OrderStatus.fromString(cursor.getString(5))); // status ở index 5
+                order.setCreatedAt(cursor.getString(6)); // created_at ở index 6
                 
             }
         } finally {
@@ -313,10 +380,10 @@ public class OrderService {
                 order.setId(cursor.getLong(0));
                 order.setUserId(cursor.getLong(1));
                 order.setTotalPrice(cursor.getDouble(2));
-                order.setCreatedAt(cursor.getString(3));
-                order.setAddress(cursor.getString(4));
-                order.setPhone(cursor.getString(5));
-                order.setStatus(com.example.quanlycuahanglaptop.domain.OrderStatus.fromString(cursor.getString(6)));
+                order.setAddress(cursor.getString(3));
+                order.setPhone(cursor.getString(4));
+                order.setStatus(com.example.quanlycuahanglaptop.domain.OrderStatus.fromString(cursor.getString(5)));
+                order.setCreatedAt(cursor.getString(6));
                 orders.add(order);
             }
         } finally {
@@ -344,10 +411,10 @@ public class OrderService {
                 order.setId(cursor.getLong(0));
                 order.setUserId(cursor.getLong(1));
                 order.setTotalPrice(cursor.getDouble(2));
-                order.setCreatedAt(cursor.getString(3));
-                order.setAddress(cursor.getString(4));
-                order.setPhone(cursor.getString(5));
-                order.setStatus(com.example.quanlycuahanglaptop.domain.OrderStatus.fromString(cursor.getString(6)));
+                order.setAddress(cursor.getString(3));
+                order.setPhone(cursor.getString(4));
+                order.setStatus(com.example.quanlycuahanglaptop.domain.OrderStatus.fromString(cursor.getString(5)));
+                order.setCreatedAt(cursor.getString(6));
                 orders.add(order);
             }
         } finally {
@@ -384,10 +451,10 @@ public class OrderService {
                 order.setId(cursor.getLong(0));
                 order.setUserId(cursor.getLong(1));
                 order.setTotalPrice(cursor.getDouble(2));
-                order.setCreatedAt(cursor.getString(3));
-                order.setAddress(cursor.getString(4));
-                order.setPhone(cursor.getString(5));
-                order.setStatus(com.example.quanlycuahanglaptop.domain.OrderStatus.fromString(cursor.getString(6)));
+                order.setAddress(cursor.getString(3));
+                order.setPhone(cursor.getString(4));
+                order.setStatus(com.example.quanlycuahanglaptop.domain.OrderStatus.fromString(cursor.getString(5)));
+                order.setCreatedAt(cursor.getString(6));
                 orders.add(order);
             }
         } finally { cursor.close(); }

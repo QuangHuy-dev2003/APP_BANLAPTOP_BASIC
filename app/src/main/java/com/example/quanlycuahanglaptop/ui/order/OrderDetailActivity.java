@@ -300,9 +300,11 @@ public class OrderDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // Cập nhật trạng thái đơn hàng thành CANCELLED
-        currentOrder.setStatus(com.example.quanlycuahanglaptop.domain.OrderStatus.CANCELLED);
-        boolean success = orderService.updateOrder(currentOrder);
+        // Thực hiện huỷ trong transaction và cộng lại kho
+        boolean success = orderService.cancelOrderAndRestoreStock(currentOrder.getId());
+        if (success) {
+            currentOrder.setStatus(com.example.quanlycuahanglaptop.domain.OrderStatus.CANCELLED);
+        }
 
         if (success) {
             CustomToast.showSuccess(this, "Đã huỷ đơn hàng thành công");

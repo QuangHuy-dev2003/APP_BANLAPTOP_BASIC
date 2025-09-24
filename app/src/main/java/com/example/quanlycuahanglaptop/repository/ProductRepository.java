@@ -41,6 +41,44 @@ public class ProductRepository {
         return db.update("Product", values, "id = ?", new String[]{String.valueOf(product.getId())});
     }
 
+    /**
+     * Giảm số lượng tồn kho nguyên tử theo sản phẩm.
+     * Trả về true nếu cập nhật thành công (đủ hàng và đã trừ), false nếu không đủ hàng.
+     */
+    public boolean decreaseQuantity(long productId, int quantity) {
+        if (quantity <= 0) return true; // Không cần trừ
+        SQLiteDatabase db = appDatabase.getConnection();
+        android.database.sqlite.SQLiteStatement stmt = db.compileStatement(
+                "UPDATE Product SET quantity = quantity - ? WHERE id = ? AND quantity >= ?"
+        );
+        try {
+            stmt.bindLong(1, quantity);
+            stmt.bindLong(2, productId);
+            stmt.bindLong(3, quantity);
+            int affected = stmt.executeUpdateDelete();
+            return affected > 0;
+        } finally {
+            stmt.close();
+        }
+    }
+
+    /** Tăng số lượng tồn kho khi huỷ đơn/trả hàng. */
+    public boolean increaseQuantity(long productId, int quantity) {
+        if (quantity <= 0) return true;
+        SQLiteDatabase db = appDatabase.getConnection();
+        android.database.sqlite.SQLiteStatement stmt = db.compileStatement(
+                "UPDATE Product SET quantity = quantity + ? WHERE id = ?"
+        );
+        try {
+            stmt.bindLong(1, quantity);
+            stmt.bindLong(2, productId);
+            int affected = stmt.executeUpdateDelete();
+            return affected > 0;
+        } finally {
+            stmt.close();
+        }
+    }
+
     public int deleteById(long id) {
         SQLiteDatabase db = appDatabase.getConnection();
         return db.delete("Product", "id = ?", new String[]{String.valueOf(id)});
